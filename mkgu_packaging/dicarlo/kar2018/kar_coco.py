@@ -12,6 +12,7 @@ from tqdm import tqdm
 from brainio_base.assemblies import NeuronRecordingAssembly
 from brainio_collection.knownfile import KnownFile as kf
 from brainio_contrib.packaging import package_stimulus_set, package_data_assembly
+from mkgu_packaging.dicarlo.kar2018 import filter_neuroids
 
 
 def collect_stimuli(stimuli_directory):
@@ -67,11 +68,18 @@ def load_responses(response_file, stimuli):
     assert len(np.unique(assembly['image_id'])) == 1600
     assert len(assembly.sel(monkey='nano')['neuroid']) == len(assembly.sel(monkey='magneto')['neuroid']) == 288
     assert len(assembly['neuroid']) == len(np.unique(assembly['neuroid_id'])) == 288 * 2
+    # filter noisy electrodes
+    assembly = filter_neuroids(assembly, threshold=.7)
+    # add time info
+    assembly = assembly.expand_dims('time_bin')
+    assembly['time_bin_start'] = 'time_bin', [70]
+    assembly['time_bin_end'] = 'time_bin', [170]
+    assembly = assembly.transpose('presentation', 'neuroid', 'time_bin')
     return assembly
 
 
 def main():
-    data_dir = Path(__file__).parent / 'ko_coco'
+    data_dir = Path(__file__).parent / 'coco'
     stimuli = collect_stimuli(data_dir / 'stimuli')
     stimuli.name = 'dicarlo.Kar2018cocogray'
     assembly = load_responses(data_dir / 'cocoGray_neural.h5', stimuli)
