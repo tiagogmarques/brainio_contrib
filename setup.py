@@ -8,8 +8,6 @@ requirements = [
     "brainio_collection @ git+https://github.com/brain-score/brainio_collection",
     # test_requirements
     "pytest",
-    "pandas",
-    "imageio",
 ]
 
 setup(

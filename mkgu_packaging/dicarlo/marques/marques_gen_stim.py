@@ -4,9 +4,9 @@ from mkgu_packaging.dicarlo.marques.marques_stim_common import gen_grating_stim,
 from brainio_collection.packaging import package_stimulus_set
 
 BLANK_STIM_NAME = 'dicarlo.Marques2020_blank'
-RF_STIM_NAME = 'dicarlo.Marques2020_rf'
+RF_STIM_NAME = 'dicarlo.Marques2020_receptive_field'
 ORIENTATION_STIM_NAME = 'dicarlo.Marques2020_orientation'
-SF_STIM_NAME = 'dicarlo.Marques2020_sf'
+SF_STIM_NAME = 'dicarlo.Marques2020_spatial_frequency'
 SIZE_STIM_NAME = 'dicarlo.Marques2020_size'
 
 DATA_DIR = '/braintree/data2/active/users/tmarques/bs_stimuli'

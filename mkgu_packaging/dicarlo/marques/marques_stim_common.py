@@ -230,11 +230,11 @@ def gen_grating_stim(degrees, size_px, stim_name, grat_contrast, grat_pos, grat_
                                 all_p[i] = grat_phase[p]
                                 i += 1
 
-    stimuli['pos_y'] = pd.Series(all_y)
-    stimuli['pos_x'] = pd.Series(all_x)
+    stimuli['position_y'] = pd.Series(all_y)
+    stimuli['position_x'] = pd.Series(all_x)
     stimuli['contrast'] = pd.Series(all_c)
     stimuli['radius'] = pd.Series(all_r)
-    stimuli['sf'] = pd.Series(all_s)
+    stimuli['spatial_frequency'] = pd.Series(all_s)
     stimuli['orientation'] = pd.Series(all_o)
     stimuli['phase'] = pd.Series(all_p)
     stimuli['image_file_name'] = pd.Series(image_names)
