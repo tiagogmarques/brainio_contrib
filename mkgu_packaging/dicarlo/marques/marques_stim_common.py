@@ -3,6 +3,7 @@ import numpy as np
 import imageio
 import os
 import pandas as pd
+from glob import glob
 
 import matplotlib.pyplot as plt
 from brainio_base.stimuli import StimulusSet
@@ -241,3 +242,96 @@ def gen_grating_stim(degrees, size_px, stim_name, grat_contrast, grat_pos, grat_
     stimuli['image_current_local_file_path'] = pd.Series(image_local_file_path)
 
     stimuli.to_csv(save_dir + os.sep + 'stimulus_set', index=False)
+
+
+def gen_texture_stim(degrees, stim_pos, save_dir):
+    if not (os.path.isdir(save_dir)):
+        os.mkdir(save_dir)
+
+    original_dir = '/braintree/home/tmarques/.brainio/image_movshon_stimuli/movshon_stimuli'
+
+    gray_c = 128
+
+    input_degrees = 4
+    aperture_degrees = 4
+
+    original_filenames = []
+    for image_file_path in glob(f"{original_dir}/*.png"):
+        original_filenames.append(image_file_path)
+
+    nStim = len(original_filenames)
+
+    im_temp = imageio.imread(original_filenames[0])
+
+    # Image size
+    size_px = np.array(im_temp.shape).astype(int)
+    px_deg = size_px[0] / input_degrees
+
+    size_px_out = (size_px * (degrees / input_degrees)).astype(int)
+    cnt_px = (stim_pos * px_deg).astype(int)
+
+    size_px_disp = ((size_px_out - size_px) / 2).astype(int)
+
+    fill_ind = [[(size_px_disp[0] + cnt_px[0]), (size_px_disp[0] + cnt_px[0] + size_px[0])],
+                [(size_px_disp[1] + cnt_px[1]), (size_px_disp[1] + cnt_px[1] + size_px[1])]]
+
+    # Image aperture
+    a = aperture_degrees * px_deg / 2
+    # Meshgrid with pixel coordinates
+    x = (np.arange(size_px_out[1]) - size_px_out[1] / 2)
+    y = (np.arange(size_px_out[0]) - size_px_out[0] / 2)
+    xv, yv = np.meshgrid(x, y)
+    # Raised cosine aperture
+    inner_mask = (xv - cnt_px[1]) ** 2 + (yv - cnt_px[0]) ** 2 < a ** 2
+    cos_mask = 1 / 2 * (1 + np.cos(np.sqrt((xv - cnt_px[1]) ** 2 + (yv - cnt_px[0]) ** 2) / a * np.pi))
+    cos_mask[np.logical_not(inner_mask)] = 0
+
+    familyNumOrder = np.array([60, 56, 13, 48, 71, 18, 327, 336, 402, 38, 23, 52, 99, 393, 30])
+
+    type = []
+    sample = []
+    family = []
+    position_x = []
+    position_y = []
+    image_names = nStim * [None]
+    image_local_file_path = nStim * [None]
+
+    for n in range(nStim):
+        im = imageio.imread(original_filenames[n])
+        im = im - gray_c * np.ones(size_px)
+        im_template = np.zeros(size_px_out)
+        im_template[fill_ind[0][0]:fill_ind[0][1], fill_ind[1][0]:fill_ind[1][1]] = im
+        im_masked = (im_template * cos_mask) + gray_c * np.ones(size_px_out)
+
+        file_name = original_filenames[n].split(os.sep)[-1]
+
+        file_parts = file_name.split(os.sep)[-1].split('.')[0].split('-')
+        if file_parts[0].find('tex') == -1:
+            type.append(1)
+        else:
+            type.append(2)
+
+        position_y.append(stim_pos[0])
+        position_x.append(stim_pos[1])
+        sample.append(int(file_parts[3][file_parts[3].find('smp')+3:]))
+        family_temp = int(file_parts[2][file_parts[2].find('im')+2:])
+        family.append(np.where(familyNumOrder == family_temp)[0][0]+1)
+
+        image_names[n] = 'aperture_' + file_name
+        image_local_file_path[n] = save_dir + os.sep + image_names[n]
+
+        imageio.imwrite(image_local_file_path[n], np.uint8(im_masked))
+
+    stimuli = pd.DataFrame({'image_id': [str(n) for n in range(nStim)], 'degrees': [degrees] * nStim})
+
+    stimuli['position_y'] = pd.Series(position_y)
+    stimuli['position_x'] = pd.Series(position_x)
+    stimuli['family'] = pd.Series(family)
+    stimuli['sample'] = pd.Series(sample)
+    stimuli['type'] = pd.Series(type)
+    stimuli['image_file_name'] = pd.Series(image_names)
+    stimuli['image_current_local_file_path'] = pd.Series(image_local_file_path)
+
+    stimuli.to_csv(save_dir + os.sep + 'stimulus_set', index=False)
+
+

@@ -1,6 +1,7 @@
 import os
 import numpy as np
-from mkgu_packaging.dicarlo.marques.marques_stim_common import gen_grating_stim, gen_blank_stim, load_stim_info
+from mkgu_packaging.dicarlo.marques.marques_stim_common import gen_grating_stim, gen_blank_stim, gen_texture_stim, \
+    load_stim_info
 from brainio_collection.packaging import package_stimulus_set
 
 BLANK_STIM_NAME = 'dicarlo.Marques2020_blank'
@@ -8,10 +9,12 @@ RF_STIM_NAME = 'dicarlo.Marques2020_receptive_field'
 ORIENTATION_STIM_NAME = 'dicarlo.Marques2020_orientation'
 SF_STIM_NAME = 'dicarlo.Marques2020_spatial_frequency'
 SIZE_STIM_NAME = 'dicarlo.Marques2020_size'
+TEXTURE_STIM_NAME = 'movshon.FreemanZiemba2013_properties'
 
 DATA_DIR = '/braintree/data2/active/users/tmarques/bs_stimuli'
 DEGREES = 12
 SIZE_PX = 672
+TEXTURE_DEGREES = 8
 
 ## All parameters
 RF_POS = np.linspace(-2.5, 2.5, 21, endpoint=True)
@@ -51,6 +54,13 @@ def main():
         stimuli = load_stim_info(stim_name, stim_dir)
         print('Packaging stimuli:' + stimuli.identifier)
         package_stimulus_set(stimuli, stimulus_set_identifier=stimuli.identifier, bucket_name='brainio.dicarlo')
+
+    texture_dir = DATA_DIR + os.sep + TEXTURE_STIM_NAME
+    if not (os.path.isdir(texture_dir)):
+        gen_texture_stim(degrees=TEXTURE_DEGREES, stim_pos=np.array([STIM_POS[0], STIM_POS[0]]), save_dir=texture_dir)
+    stimuli = load_stim_info(TEXTURE_STIM_NAME, texture_dir)
+    print('Packaging stimuli:' + stimuli.identifier)
+    package_stimulus_set(stimuli, stimulus_set_identifier=stimuli.identifier, bucket_name='brainio.contrib')
     return
 
 

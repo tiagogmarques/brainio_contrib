@@ -9,6 +9,13 @@ SPATIAL_FREQUENCY_STIM_NAME = 'dicarlo.Marques2020_spatial_frequency'
 
 
 def collect_data():
+    n_neurons = 87
+    # Spatial frequency selective data
+    spatial_frequency_selective_bins = np.linspace(0, 1, num=3)
+    spatial_frequency_selective_hist = np.array([14, 73])
+    spatial_frequency_selective = np.concatenate((np.zeros(spatial_frequency_selective_hist[0]),
+                                                  np.ones(spatial_frequency_selective_hist[1]))).reshape((-1,1))
+
     # Spatial frequency bandwidth data
     spatial_frequency_bandwidth_bins = np.linspace(0, 100, num=11)
     spatial_frequency_bandwidth_simple_hist = np.array([0, 0, 0, 6, 5, 10, 7, 2, 0, 0])
@@ -17,19 +24,17 @@ def collect_data():
                                         spatial_frequency_bandwidth_complex_hist)
     spatial_frequency_bandwidth = gen_sample(spatial_frequency_bandwidth_hist, spatial_frequency_bandwidth_bins,
                                              scale='linear')
-    # Spatial frequency selective data
-    spatial_frequency_selective_bins = np.linspace(0, 1, num=3)
-    spatial_frequency_selective_hist = np.array([14, spatial_frequency_bandwidth_hist.sum()])
-    spatial_frequency_selective = np.concatenate((np.zeros(spatial_frequency_selective_hist[0]),
-                                                  np.ones(spatial_frequency_selective_hist[1]))).reshape((-1,1))
+    filler = np.zeros((n_neurons - spatial_frequency_bandwidth_hist.sum(), 1))
+    filler[:] = np.nan
+    spatial_frequency_bandwidth = np.concatenate((filler, spatial_frequency_bandwidth))
 
     # Create DataAssembly with single neuronal properties and bin information
-    assembly = np.concatenate((spatial_frequency_bandwidth, spatial_frequency_selective), axis=1)
+    assembly = np.concatenate((spatial_frequency_selective, spatial_frequency_bandwidth), axis=1)
 
     assembly = DataAssembly(assembly, coords={'neuroid_id': ('neuroid', range(assembly.shape[0])),
                                               'region': ('neuroid', ['V1'] * assembly.shape[0]),
-                                              'neuronal_property': ['spatial_frequency_bandwidth',
-                                                                    'spatial_frequency_selective']},
+                                              'neuronal_property': ['spatial_frequency_selective',
+                                                                    'spatial_frequency_bandwidth']},
                             dims=['neuroid', 'neuronal_property'])
 
     assembly.attrs['number_of_trials'] = 20
