@@ -9,9 +9,9 @@ ASSEMBLY_NAME = 'shapley.Ringach2002'
 ORIENTATION_STIM_NAME = 'dicarlo.Marques2020_orientation'
 
 PROPERTY_NAMES = ['baseline', 'max_dc', 'min_dc', 'max_ac', 'modulation_ratio', 'circular_variance', 'bandwidth',
-                  'orthogonal_preferred_ratio', 'orientation_selective', 'circular_variance_bandwith_ratio',
+                  'orthogonal_preferred_ratio', 'orientation_selective', 'circular_variance_bandwidth_ratio',
                   'orthogonal_preferred_ratio_circular_variance_difference',
-                  'orthogonal_preferred_ratio_bandwith_ratio']
+                  'orthogonal_preferred_ratio_bandwidth_ratio']
 
 
 def collect_data(data_dir):
@@ -37,9 +37,9 @@ def collect_data(data_dir):
     orientation_selective[np.isnan(bandwidth)] = 0
 
     # Orientation tuning properties covariances
-    circular_variance_bandwith_ratio = circular_variance / bandwidth
+    circular_variance_bandwidth_ratio = circular_variance / bandwidth
     orthogonal_preferred_ratio_circular_variance_difference = orthogonal_preferred_ratio - circular_variance
-    orthogonal_preferred_ratio_bandwith_ratio = orthogonal_preferred_ratio/bandwidth
+    orthogonal_preferred_ratio_bandwidth_ratio = orthogonal_preferred_ratio/bandwidth
 
     # Bins
     max_dc_bins = np.logspace(0, 3, 10, base=10)
@@ -53,16 +53,16 @@ def collect_data(data_dir):
     orthogonal_preferred_ratio_bins = np.linspace(0, 1, num=14)
     orientation_selective_bins = np.linspace(0, 1, num=3)
 
-    circular_variance_bandwith_ratio_bins = np.logspace(-3, 0, num=16, base=10)
-    orthogonal_preferred_ratio_bandwith_ratio_bins = np.logspace(-3, 0, num=16, base=10)
+    circular_variance_bandwidth_ratio_bins = np.logspace(-3, 0, num=16, base=10)
+    orthogonal_preferred_ratio_bandwidth_ratio_bins = np.logspace(-3, 0, num=16, base=10)
     orthogonal_preferred_ratio_circular_variance_difference_bins = np.linspace(-1, 1, num=20)
 
     # Create DataAssembly with single neuronal properties and bin information
     assembly = np.concatenate((baseline, max_dc, min_dc, max_ac, modulation_ratio, circular_variance, bandwidth,
                                orthogonal_preferred_ratio, orientation_selective,
-                               circular_variance_bandwith_ratio,
+                               circular_variance_bandwidth_ratio,
                                orthogonal_preferred_ratio_circular_variance_difference,
-                               orthogonal_preferred_ratio_bandwith_ratio), axis=1)
+                               orthogonal_preferred_ratio_bandwidth_ratio), axis=1)
 
     # Filters neurons with weak responses
     good_neuroids = max_dc > baseline + 5
