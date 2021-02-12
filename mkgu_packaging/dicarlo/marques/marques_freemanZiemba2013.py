@@ -9,15 +9,15 @@ ASSEMBLY_NAME = 'movshon.FreemanZiemba2013_V1_properties'
 TEXTURE_STIM_NAME = 'movshon.FreemanZiemba2013_properties'
 
 PROPERTY_NAMES = ['texture_modulation_index', 'absolute_texture_modulation_index', 'texture_selectivity',
-                  'noise_selectivity', 'texture_sparseness', 'noise_sparseness', 'variance_ratio',
-                  'max_texture', 'max_noise', ]
+                  'noise_selectivity', 'texture_sparseness', 'noise_sparseness', 'variance_ratio', 'sample_variance',
+                  'family_variance', 'max_texture', 'max_noise', ]
 
 
 def collect_data(data_dir):
     response_file = h5py.File(data_dir, 'r')
 
     texture_modulation_index, absolute_texture_modulation_index, texture_selectivity, noise_selectivity, \
-    texture_sparseness, noise_sparseness, variance_ratio, max_texture, max_noise = \
+    texture_sparseness, noise_sparseness, variance_ratio, sample_variance, family_variance, max_texture, max_noise = \
         calculate_texture_properties(response_file, area='v1')
 
     # Bins
@@ -30,11 +30,13 @@ def collect_data(data_dir):
     texture_sparseness_bins = np.linspace(0, 1, num=11)
     noise_sparseness_bins = np.linspace(0, 1, num=11)
     variance_ratio_bins = np.logspace(-2, 1, num=13)
+    sample_variance_bins = np.linspace(0, 1, num=11)
+    family_variance_bins = np.linspace(0, 1, num=11)
 
     # Create DataAssembly with single neuronal properties and bin information
     assembly = np.concatenate((texture_modulation_index, absolute_texture_modulation_index, texture_selectivity,
-                               noise_selectivity, texture_sparseness, noise_sparseness, variance_ratio,
-                               max_texture, max_noise), axis=1)
+                               noise_selectivity, texture_sparseness, noise_sparseness, variance_ratio, sample_variance,
+                               family_variance, max_texture, max_noise), axis=1)
 
     assembly = DataAssembly(assembly, coords={'neuroid_id': ('neuroid', range(assembly.shape[0])),
                                               'region': ('neuroid', ['V1'] * assembly.shape[0]),
@@ -111,6 +113,8 @@ def calculate_texture_properties(response_file, area='v1'):
     texture_sparseness = np.zeros((n_neurons, 1))
     noise_sparseness = np.zeros((n_neurons, 1))
     variance_ratio = np.zeros((n_neurons, 1))
+    sample_variance = np.zeros((n_neurons, 1))
+    family_variance = np.zeros((n_neurons, 1))
 
     for n in range(n_neurons):
         # Texture modulation
@@ -123,12 +127,13 @@ def calculate_texture_properties(response_file, area='v1'):
         texture_sparseness[n] = calculate_sparseness(sample_responses[n, 1])
         # Noise sparseness (sparseness over noise samples)
         noise_sparseness[n] = calculate_sparseness(sample_responses[n, 0])
-        variance_ratio[n] = calculate_variance_ratio(responses_stabilized[n, 1])
+        variance_ratio[n], sample_variance[n], family_variance[n] = calculate_variance_ratio(responses_stabilized[n, 1])
 
     absolute_texture_modulation_index = np.abs(texture_modulation_index)
 
     return texture_modulation_index, absolute_texture_modulation_index, texture_selectivity, noise_selectivity,\
-           texture_sparseness, noise_sparseness, variance_ratio, max_texture, max_noise
+           texture_sparseness, noise_sparseness, variance_ratio, sample_variance, family_variance, max_texture, \
+           max_noise
 
 
 def calculate_mean_response(response, lat, resp_nbin=10):
@@ -211,7 +216,7 @@ def calculate_variance_ratio(response):
 
     variance_ratio = (family_variance / total_variance + 0.02) / (sample_variance / total_variance + 0.02)
 
-    return variance_ratio
+    return variance_ratio, sample_variance / total_variance, family_variance / total_variance
 
 
 def calculate_variance(response):

@@ -180,7 +180,59 @@ def gen_blank_stim(degrees, size_px, save_dir):
     stimuli.to_csv(save_dir + os.sep + 'stimulus_set', index=False)
 
 
-def gen_grating_stim(degrees, size_px, stim_name, grat_contrast, grat_pos, grat_rad, grat_sf, grat_orientation,
+def gen_grating_stim(degrees, size_px, stim_name, grat_params, save_dir):
+    if not (os.path.isdir(save_dir)):
+        os.mkdir(save_dir)
+
+    width = degrees
+
+    nStim = grat_params.shape[0]
+
+    print('Generating stimulus: #', nStim)
+
+    stimuli = pd.DataFrame({'image_id': [str(n) for n in range(nStim)], 'degrees': [width] * nStim})
+
+    image_names = nStim * [None]
+    image_local_file_path = nStim * [None]
+    all_y = nStim * [None]
+    all_x = nStim * [None]
+    all_c = nStim * [None]
+    all_r = nStim * [None]
+    all_s = nStim * [None]
+    all_o = nStim * [None]
+    all_p = nStim * [None]
+
+    for i in np.arange(nStim):
+        stim_id = np.uint64(grat_params[i, 0] * 10e9 + grat_params[i, 1] * 10e7 + grat_params[i, 3] * 10e5 +
+                            grat_params[i, 4] * 10e3 + grat_params[i, 5] * 10e1 + grat_params[i, 6])
+        grat = Grating(width=width, pos=[grat_params[i, 0], grat_params[i, 1]], contrast=grat_params[i, 2],
+                       rad=grat_params[i, 3], sf=grat_params[i, 4], orientation=grat_params[i, 5],
+                       phase=grat_params[i, 6], stim_id= stim_id, format_id='{0:012d}', save_dir=save_dir,
+                       size_px=[size_px, size_px], type_name=stim_name)
+        image_names[i] = (grat.save_stimulus())
+        image_local_file_path[i] = save_dir + os.sep + image_names[i]
+        all_y[i] = grat_params[i, 0]
+        all_x[i] = grat_params[i, 1]
+        all_c[i] = grat_params[i, 2]
+        all_r[i] = grat_params[i, 3]
+        all_s[i] = grat_params[i, 4]
+        all_o[i] = grat_params[i, 5]
+        all_p[i] = grat_params[i, 6]
+
+    stimuli['position_y'] = pd.Series(all_y)
+    stimuli['position_x'] = pd.Series(all_x)
+    stimuli['contrast'] = pd.Series(all_c)
+    stimuli['radius'] = pd.Series(all_r)
+    stimuli['spatial_frequency'] = pd.Series(all_s)
+    stimuli['orientation'] = pd.Series(all_o)
+    stimuli['phase'] = pd.Series(all_p)
+    stimuli['image_file_name'] = pd.Series(image_names)
+    stimuli['image_current_local_file_path'] = pd.Series(image_local_file_path)
+
+    stimuli.to_csv(save_dir + os.sep + 'stimulus_set', index=False)
+
+
+def gen_grating_stim_old(degrees, size_px, stim_name, grat_contrast, grat_pos, grat_rad, grat_sf, grat_orientation,
                      grat_phase, save_dir):
     if not (os.path.isdir(save_dir)):
         os.mkdir(save_dir)

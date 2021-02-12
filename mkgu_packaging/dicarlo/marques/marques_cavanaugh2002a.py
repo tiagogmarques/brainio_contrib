@@ -60,7 +60,7 @@ def collect_data():
                                               'neuronal_property': PROPERTY_NAMES},
                             dims=['neuroid', 'neuronal_property'])
 
-    assembly.attrs['number_of_trials'] = 40
+    assembly.attrs['number_of_trials'] = 20
 
     for p in assembly.coords['neuronal_property'].values:
         assembly.attrs[p+'_bins'] = eval(p+'_bins')

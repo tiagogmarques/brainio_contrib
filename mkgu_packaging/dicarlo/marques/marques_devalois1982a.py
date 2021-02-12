@@ -10,7 +10,7 @@ ORIENTATION_STIM_NAME = 'dicarlo.Marques2020_orientation'
 
 def collect_data():
     # Preferred orientation data
-    preferred_orientation_hist = np.array([77, 49, 66, 54])
+    preferred_orientation_hist = np.array([110, 83, 100, 92])
     preferred_orientation_bins = np.linspace(-22.5, 157.5, 5)
 
     preferred_orientation = gen_sample(preferred_orientation_hist, preferred_orientation_bins, scale='linear')
